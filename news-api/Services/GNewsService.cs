@@ -1,29 +1,49 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using news_api.Models;
-using Newtonsoft.Json;
 
 namespace news_api.Services;
 
 public class GNewsService : INewsService
 {
     private readonly GNewsOptions gNewsOptions;
+    private readonly HttpClient httpClient;
 
-    public GNewsService(IOptions<GNewsOptions> gNewsOptions)
+    public GNewsService(IOptions<GNewsOptions> gNewsOptions, HttpClient httpClient)
     {
         this.gNewsOptions = gNewsOptions.Value;
+        this.httpClient = httpClient;
     }
 
-    public async Task<ICollection<Article>> GetArticlesAsync(int count)
+    public async Task<ICollection<Article>> GetTrendingArticlesAsync(int count, DateTime? from, DateTime? to)
     {
-        string url = $"{gNewsOptions.BaseUrl}/top-headlines?max={count}&apikey={gNewsOptions.ApiKey}";
+        var query = new Dictionary<string, string?>()
+        {
+            ["max"] = count.ToString(),
+            ["from"] = from?.ToString(),
+            ["to"] = to?.ToString()
+        };
 
-        HttpClient client = new HttpClient();
-        HttpResponseMessage response = await client.GetAsync(url);
+        return await FetchArticlesAsync("/top-headlines", query);
+    }
+
+    private async Task<ICollection<Article>> FetchArticlesAsync(string path, Dictionary<string, string?> queryParams)
+    {
+        queryParams["apikey"] = gNewsOptions.ApiKey;
+
+        var uri = BuildUri(path, queryParams);
+        var response = await httpClient.GetAsync(uri);
         response.EnsureSuccessStatusCode();
-        string responseBody = await response.Content.ReadAsStringAsync();
-        var data = JsonConvert.DeserializeObject<ApiResponse>(responseBody);
-        List<Article> articles = data.Articles;
+        var data = await response.Content.ReadFromJsonAsync<ApiResponse>();
 
-        return articles;
+        return data?.Articles ?? new List<Article>();
+    }
+
+    private string BuildUri(string path, Dictionary<string, string?> queryParams)
+    {
+        var baseUrl = gNewsOptions.BaseUrl.TrimEnd('/');
+        path = path.TrimStart('/');
+        string url = QueryHelpers.AddQueryString($"{baseUrl}/{path}", queryParams);
+        return url;
     }
 }

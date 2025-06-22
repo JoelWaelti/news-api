@@ -11,6 +11,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient<INewsService, GNewsService>();
 
+builder.Services.AddHttpClient();
+
 builder.Services.Configure<GNewsOptions>(
     builder.Configuration.GetSection("GNews"));
 

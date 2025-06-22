@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using news_api.Models;
 using news_api.Services;
 
 namespace news_api.Controllers;
@@ -20,9 +21,17 @@ public class NewsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetArticles(int count)
+    public async Task<IActionResult> GetArticles(DateOnly? date, int count = 10)
     {
-        var articles = await newsService.GetArticlesAsync(count);
+        DateTime? from = null, to = null;
+
+        if (date.HasValue)
+        {
+            from = date.Value.ToDateTime(TimeOnly.MinValue);
+            to = date.Value.ToDateTime(TimeOnly.MaxValue);
+        }
+
+        var articles = await newsService.GetTrendingArticlesAsync(count, from, to);
         return Ok(articles);
     }
 }

@@ -4,5 +4,5 @@ namespace news_api.Services;
 
 public interface INewsService
 {
-    Task<ICollection<Article>> GetArticlesAsync(int count);
+    Task<ICollection<Article>> GetTrendingArticlesAsync(int count, DateTime? from, DateTime? to);
 }
