@@ -36,7 +36,7 @@ public class NewsController : ControllerBase
         return Ok(articles);
     }
 
-    [HttpGet("/search")]
+    [HttpGet("search")]
     public async Task<IActionResult> SearchArticles(string keywords, DateOnly? date, int count = 10, string searchIn = "title,description,content")
     {
         logger.LogInformation("Searching articles... (count = {count}, date = {date}, keywords = {keywords})", count, date, keywords);
