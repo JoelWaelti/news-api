@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using news_api.Models;
 using news_api.Services;
 
 namespace news_api.Controllers;
@@ -23,6 +22,8 @@ public class NewsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetArticles(DateOnly? date, int count = 10)
     {
+        logger.LogInformation("Getting articles... (count = {count}, date = {date})", count, date);
+
         DateTime? from = null, to = null;
 
         if (date.HasValue)
@@ -38,6 +39,8 @@ public class NewsController : ControllerBase
     [HttpGet("/search")]
     public async Task<IActionResult> SearchArticles(string keywords, DateOnly? date, int count = 10, string searchIn = "title,description,content")
     {
+        logger.LogInformation("Searching articles... (count = {count}, date = {date}, keywords = {keywords})", count, date, keywords);
+
         DateTime? from = null, to = null;
 
         if(date.HasValue)

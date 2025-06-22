@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Extensions;
 using news_api.Models;
 
 namespace news_api.Services;
@@ -50,8 +51,14 @@ public class GNewsService : INewsService
 
         var uri = BuildUri(path, queryParams);
 
+        logger.LogInformation("Making GNews API request: GET {uri}", uri.ToString());
+
         var response = await httpClient.GetAsync(uri);
+
+        logger.LogInformation("GNews API request returned: {statusCode}", response.StatusCode.GetDisplayName());
+
         response.EnsureSuccessStatusCode();
+
         var data = await response.Content.ReadFromJsonAsync<ApiResponse>();
 
         return data?.Articles ?? new List<Article>();
