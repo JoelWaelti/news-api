@@ -34,4 +34,19 @@ public class NewsController : ControllerBase
         var articles = await newsService.GetTrendingArticlesAsync(count, from, to);
         return Ok(articles);
     }
+
+    [HttpGet("/search")]
+    public async Task<IActionResult> SearchArticles(string keywords, DateOnly? date, int count = 10, string searchIn = "title,description,content")
+    {
+        DateTime? from = null, to = null;
+
+        if(date.HasValue)
+        {
+            from = date.Value.ToDateTime(TimeOnly.MinValue);
+            to = date.Value.ToDateTime(TimeOnly.MaxValue);
+        }
+
+        var articles = await newsService.SearchArticlesAsync(keywords, from, to, count, searchIn);
+        return Ok(articles);
+    }
 }

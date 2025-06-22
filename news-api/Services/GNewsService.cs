@@ -27,6 +27,20 @@ public class GNewsService : INewsService
         return await FetchArticlesAsync("/top-headlines", query);
     }
 
+    public async Task<ICollection<Article>> SearchArticlesAsync(string? keywords, DateTime? from, DateTime? to, int count, string searchIn)
+    {
+        var query = new Dictionary<string, string?>()
+        {
+            ["q"] = keywords,
+            ["in"] = searchIn,
+            ["max"] = count.ToString(),
+            ["from"] = from?.ToString(),
+            ["to"] = to?.ToString()
+        };
+
+        return await FetchArticlesAsync("/search", query);
+    }
+
     private async Task<ICollection<Article>> FetchArticlesAsync(string path, Dictionary<string, string?> queryParams)
     {
         queryParams["apikey"] = gNewsOptions.ApiKey;
