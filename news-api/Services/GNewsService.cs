@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using news_api.Models;
 
@@ -8,11 +9,13 @@ public class GNewsService : INewsService
 {
     private readonly GNewsOptions gNewsOptions;
     private readonly HttpClient httpClient;
+    private readonly ILogger<GNewsService> logger;
 
-    public GNewsService(IOptions<GNewsOptions> gNewsOptions, HttpClient httpClient)
+    public GNewsService(IOptions<GNewsOptions> gNewsOptions, HttpClient httpClient, ILogger<GNewsService> logger)
     {
         this.gNewsOptions = gNewsOptions.Value;
         this.httpClient = httpClient;
+        this.logger = logger;
     }
 
     public async Task<ICollection<Article>> GetTrendingArticlesAsync(int count, DateTime? from, DateTime? to)
@@ -20,8 +23,8 @@ public class GNewsService : INewsService
         var query = new Dictionary<string, string?>()
         {
             ["max"] = count.ToString(),
-            ["from"] = from?.ToString(),
-            ["to"] = to?.ToString()
+            ["from"] = ToGNewsDateString(from),
+            ["to"] = ToGNewsDateString(to)
         };
 
         return await FetchArticlesAsync("/top-headlines", query);
@@ -34,8 +37,8 @@ public class GNewsService : INewsService
             ["q"] = keywords,
             ["in"] = searchIn,
             ["max"] = count.ToString(),
-            ["from"] = from?.ToString(),
-            ["to"] = to?.ToString()
+            ["from"] = ToGNewsDateString(from),
+            ["to"] = ToGNewsDateString(to)
         };
 
         return await FetchArticlesAsync("/search", query);
@@ -46,6 +49,7 @@ public class GNewsService : INewsService
         queryParams["apikey"] = gNewsOptions.ApiKey;
 
         var uri = BuildUri(path, queryParams);
+
         var response = await httpClient.GetAsync(uri);
         response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadFromJsonAsync<ApiResponse>();
@@ -59,5 +63,10 @@ public class GNewsService : INewsService
         path = path.TrimStart('/');
         string url = QueryHelpers.AddQueryString($"{baseUrl}/{path}", queryParams);
         return url;
+    }
+
+    private string? ToGNewsDateString(DateTime? date)
+    {
+        return date?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
     }
 }
