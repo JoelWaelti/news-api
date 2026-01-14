@@ -40,6 +40,6 @@ cd <PATH TO REPO>/news-api
 docker build -f news-api/Dockerfile -t news-api .
 docker run -d --name news-api -p 8080:8080 -e GNEWS__APIKEY=<API KEY> news-api
 ```
-This runs to application as a Docker container on https://localhost:8080.
+This runs the application as a Docker container on https://localhost:8080.
 
 INFO: You need to specify a GNews API key (Sign up under https://gnews.io to get one).
