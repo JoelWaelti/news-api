@@ -1,5 +1,3 @@
-dummy change for testing
-
 # News API
 
 This is a simple news API to fetch news articles. It uses the GNews API to get the articles.
